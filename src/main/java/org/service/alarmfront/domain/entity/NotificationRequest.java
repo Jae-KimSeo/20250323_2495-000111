@@ -9,6 +9,8 @@ import org.service.alarmfront.domain.value.Channel;
 import org.service.alarmfront.domain.value.Status;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "notification_requests")
@@ -42,6 +44,9 @@ public class NotificationRequest {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "request", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NotificationHistory> histories = new ArrayList<>();
+
     public static NotificationRequest create(Channel channel, String contents, LocalDateTime scheduledTime) {
         NotificationRequest request = new NotificationRequest();
         request.channel = channel;
@@ -53,5 +58,13 @@ public class NotificationRequest {
 
     public void updateStatus(Status status) {
         this.status = status;
+    }
+
+    public void addHistory(NotificationHistory history) {
+        this.histories.add(history);
+    }
+
+    public int getAttemptCount() {
+        return histories.size();
     }
 } 
