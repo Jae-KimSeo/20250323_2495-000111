@@ -7,6 +7,7 @@ import org.service.alarmfront.application.port.out.NotificationSender;
 import org.service.alarmfront.domain.value.Channel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.EnumMap;
@@ -17,7 +18,11 @@ public class NotificationSenderConfig {
 
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(15000);
+        factory.setReadTimeout(15000);
+        
+        return new RestTemplate(factory);
     }
 
     @Bean
