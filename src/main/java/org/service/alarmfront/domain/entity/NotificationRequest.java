@@ -62,6 +62,16 @@ public class NotificationRequest {
         return request;
     }
 
+    public static NotificationRequest create(String targetId, Channel channel, String contents, LocalDateTime scheduledTime) {
+        NotificationRequest request = new NotificationRequest();
+        request.targetId = targetId;
+        request.channel = channel;
+        request.contents = contents;
+        request.scheduledTime = scheduledTime;
+        request.status = Status.INIT;
+        return request;
+    }
+
     public void updateStatus(Status status) {
         this.status = status;
     }
