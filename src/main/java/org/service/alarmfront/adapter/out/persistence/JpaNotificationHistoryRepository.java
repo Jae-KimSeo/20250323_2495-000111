@@ -13,7 +13,7 @@ public interface JpaNotificationHistoryRepository extends JpaRepository<Notifica
     List<NotificationHistory> findByRequest(NotificationRequest request);
     List<NotificationHistory> findByRequestId(Long requestId);
     List<NotificationHistory> findByResultCode(ResultCode resultCode);
-    
+
     @Query("SELECT COUNT(h) FROM NotificationHistory h WHERE h.request.id = :requestId")
     Integer countByRequestId(@Param("requestId") Long requestId);
-} 
+}

@@ -45,4 +45,4 @@ public class NotificationHistoryPersistenceAdapter implements NotificationHistor
     public Integer countByRequestId(Long requestId) {
         return jpaNotificationHistoryRepository.countByRequestId(requestId);
     }
-} 
+}

@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "notification_requests")
+@Table(name = "notification_requests", indexes = {
+    @Index(name = "idx_notification_req_created", columnList = "created_at")
+})
 @Getter
 @NoArgsConstructor
 public class NotificationRequest {
@@ -21,6 +23,9 @@ public class NotificationRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "target_id", nullable = false)
+    private String targetId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -49,6 +54,17 @@ public class NotificationRequest {
 
     public static NotificationRequest create(Channel channel, String contents, LocalDateTime scheduledTime) {
         NotificationRequest request = new NotificationRequest();
+        request.targetId = "testTarget";
+        request.channel = channel;
+        request.contents = contents;
+        request.scheduledTime = scheduledTime;
+        request.status = Status.INIT;
+        return request;
+    }
+
+    public static NotificationRequest create(String targetId, Channel channel, String contents, LocalDateTime scheduledTime) {
+        NotificationRequest request = new NotificationRequest();
+        request.targetId = targetId;
         request.channel = channel;
         request.contents = contents;
         request.scheduledTime = scheduledTime;
@@ -67,4 +83,4 @@ public class NotificationRequest {
     public int getAttemptCount() {
         return histories.size();
     }
-} 
+}
