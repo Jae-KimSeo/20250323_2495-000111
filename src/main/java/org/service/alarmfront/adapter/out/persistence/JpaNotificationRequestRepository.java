@@ -1,5 +1,7 @@
 package org.service.alarmfront.adapter.out.persistence;
 
+import org.service.alarmfront.adapter.in.web.NotificationHistoryResponseDTO;
+import org.service.alarmfront.domain.entity.NotificationHistory;
 import org.service.alarmfront.domain.entity.NotificationRequest;
 import org.service.alarmfront.domain.value.Status;
 import org.springframework.data.domain.Page;
@@ -26,7 +28,19 @@ public interface JpaNotificationRequestRepository extends JpaRepository<Notifica
     @Query("SELECT r FROM NotificationRequest r WHERE r.status = :status AND r.attemptCount < :maxRetryCount")
     List<NotificationRequest> findRetryableNotifications(@Param("status") Status status, @Param("maxRetryCount") int maxRetryCount);
     
-    Page<NotificationRequest> findRecentNotificationsByTargetId(String targetId, LocalDateTime startDate, Pageable pageable);
+    @Query("SELECT r FROM NotificationRequest r WHERE r.targetId = :targetId AND r.createdAt >= :startDate ORDER BY r.createdAt DESC")
+    Page<NotificationRequest> findRecentNotificationsByTargetId(@Param("targetId") String targetId, @Param("startDate") LocalDateTime startDate, Pageable pageable);
+    
+    @Query("SELECT new org.service.alarmfront.adapter.in.web.NotificationHistoryResponseDTO(" +
+           "r.id, r.targetId, r.channel, r.contents, r.createdAt, r.scheduledTime, r.status, r.attemptCount, " +
+           "(SELECT h.resultCode FROM NotificationHistory h WHERE h.request.id = r.id ORDER BY h.createdAt DESC LIMIT 1)) " +
+           "FROM NotificationRequest r " +
+           "WHERE r.targetId = :targetId AND r.createdAt >= :startDate " +
+           "ORDER BY r.createdAt DESC")
+    Page<NotificationHistoryResponseDTO> findNotificationHistoryByTargetId(
+        @Param("targetId") String targetId, 
+        @Param("startDate") LocalDateTime startDate, 
+        Pageable pageable);
     
     @Modifying
     @Transactional

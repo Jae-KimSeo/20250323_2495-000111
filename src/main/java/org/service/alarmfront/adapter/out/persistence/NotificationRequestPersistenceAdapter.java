@@ -1,6 +1,7 @@
 package org.service.alarmfront.adapter.out.persistence;
 
 import lombok.RequiredArgsConstructor;
+import org.service.alarmfront.adapter.in.web.NotificationHistoryResponseDTO;
 import org.service.alarmfront.application.port.out.NotificationRequestRepository;
 import org.service.alarmfront.domain.entity.NotificationRequest;
 import org.service.alarmfront.domain.value.Status;
@@ -62,6 +63,11 @@ public class NotificationRequestPersistenceAdapter implements NotificationReques
     @Override
     public Page<NotificationRequest> findRecentNotificationsByTargetId(String targetId, LocalDateTime startDate, Pageable pageable) {
         return jpaNotificationRequestRepository.findRecentNotificationsByTargetId(targetId, startDate, pageable);
+    }
+    
+    @Override
+    public Page<NotificationHistoryResponseDTO> findNotificationHistoryByTargetId(String targetId, LocalDateTime startDate, Pageable pageable) {
+        return jpaNotificationRequestRepository.findNotificationHistoryByTargetId(targetId, startDate, pageable);
     }
     
     @Override

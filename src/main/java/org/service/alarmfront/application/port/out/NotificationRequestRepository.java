@@ -1,5 +1,6 @@
 package org.service.alarmfront.application.port.out;
 
+import org.service.alarmfront.adapter.in.web.NotificationHistoryResponseDTO;
 import org.service.alarmfront.domain.entity.NotificationRequest;
 import org.service.alarmfront.domain.value.Status;
 import org.springframework.data.domain.Page;
@@ -19,5 +20,6 @@ public interface NotificationRequestRepository {
     void updateStatus(Long id, Status status);
     List<NotificationRequest> findRetryableNotifications(Status status, int maxRetryCount);
     Page<NotificationRequest> findRecentNotificationsByTargetId(String targetId, LocalDateTime startDate, Pageable pageable);
+    Page<NotificationHistoryResponseDTO> findNotificationHistoryByTargetId(String targetId, LocalDateTime startDate, Pageable pageable);
     void deleteNotificationsOlderThan(LocalDateTime olderThan);
 }

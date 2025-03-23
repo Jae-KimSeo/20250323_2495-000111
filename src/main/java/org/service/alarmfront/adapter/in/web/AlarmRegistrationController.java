@@ -4,15 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.service.alarmfront.application.port.in.InquireNotificationHistoryUseCase;
 import org.service.alarmfront.application.port.in.RegisterAlarmUseCase;
-import org.service.alarmfront.application.port.out.NotificationRequestRepository;
-import org.service.alarmfront.domain.entity.NotificationRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -21,7 +15,6 @@ import java.util.Optional;
 public class AlarmRegistrationController {
 
     private final RegisterAlarmUseCase registerAlarmUseCase;
-    private final NotificationRequestRepository notificationRequestRepository;
     private final InquireNotificationHistoryUseCase inquireNotificationHistoryUseCase;
     
     @PostMapping
@@ -43,10 +36,10 @@ public class AlarmRegistrationController {
             @RequestParam(defaultValue = "20") int size) {
         try {
             log.info("Received request to get notification history for customer: {}", customerId);
-            Page<NotificationRequest> notificationPage = inquireNotificationHistoryUseCase.getNotificationHistory(
+            Page<NotificationHistoryResponseDTO> notificationPage = inquireNotificationHistoryUseCase.getNotificationHistory(
                     customerId, page, size);
             
-            Page<NotificationHistoryResponse> responsePage = notificationPage.map(NotificationHistoryResponse::fromEntity);
+            Page<NotificationHistoryResponse> responsePage = notificationPage.map(NotificationHistoryResponseDTO::toResponse);
             
             return ResponseEntity.ok(PageResponse.from(responsePage));
         } catch (Exception e) {
