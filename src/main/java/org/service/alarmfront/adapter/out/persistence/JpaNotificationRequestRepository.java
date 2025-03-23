@@ -26,7 +26,7 @@ public interface JpaNotificationRequestRepository extends JpaRepository<Notifica
     @Query("SELECT r FROM NotificationRequest r WHERE r.status = :status AND r.attemptCount < :maxRetryCount")
     List<NotificationRequest> findRetryableNotifications(@Param("status") Status status, @Param("maxRetryCount") int maxRetryCount);
     
-    Page<NotificationRequest> findByTargetIdAndCreatedAtGreaterThanEqualOrderByCreatedAtDesc(String targetId, LocalDateTime startDate, Pageable pageable);
+    Page<NotificationRequest> findRecentNotificationsByTargetId(String targetId, LocalDateTime startDate, Pageable pageable);
     
     @Modifying
     @Transactional

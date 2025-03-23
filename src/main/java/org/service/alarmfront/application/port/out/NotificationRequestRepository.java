@@ -18,6 +18,6 @@ public interface NotificationRequestRepository {
     List<NotificationRequest> findScheduledNotifications(LocalDateTime beforeTime);
     void updateStatus(Long id, Status status);
     List<NotificationRequest> findRetryableNotifications(Status status, int maxRetryCount);
-    Page<NotificationRequest> findByTargetIdAndCreatedAfter(String targetId, LocalDateTime startDate, Pageable pageable);
+    Page<NotificationRequest> findRecentNotificationsByTargetId(String targetId, LocalDateTime startDate, Pageable pageable);
     void deleteNotificationsOlderThan(LocalDateTime olderThan);
 }

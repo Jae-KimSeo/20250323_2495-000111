@@ -60,8 +60,8 @@ public class NotificationRequestPersistenceAdapter implements NotificationReques
     }
     
     @Override
-    public Page<NotificationRequest> findByTargetIdAndCreatedAfter(String targetId, LocalDateTime startDate, Pageable pageable) {
-        return jpaNotificationRequestRepository.findByTargetIdAndCreatedAtGreaterThanEqualOrderByCreatedAtDesc(targetId, startDate, pageable);
+    public Page<NotificationRequest> findRecentNotificationsByTargetId(String targetId, LocalDateTime startDate, Pageable pageable) {
+        return jpaNotificationRequestRepository.findRecentNotificationsByTargetId(targetId, startDate, pageable);
     }
     
     @Override

@@ -26,6 +26,6 @@ public class NotificationHistoryInquiryService implements InquireNotificationHis
         LocalDateTime threeMonthsAgo = LocalDateTime.now().minusMonths(3);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        return notificationRequestRepository.findByTargetIdAndCreatedAfter(customerId, threeMonthsAgo, pageable);
+        return notificationRequestRepository.findRecentNotificationsByTargetId(customerId, threeMonthsAgo, pageable);
     }
 }
