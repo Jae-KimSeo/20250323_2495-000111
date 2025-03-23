@@ -6,6 +6,6 @@ public enum Status {
     PROCESSING,
     SCHEDULED,
     COMPLETED,
-    SENT,
-    FAILED
+    FAILED,
+    RETRY_EXHAUSTED
 } 

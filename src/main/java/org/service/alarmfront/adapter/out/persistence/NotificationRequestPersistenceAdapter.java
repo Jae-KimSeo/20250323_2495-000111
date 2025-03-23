@@ -4,8 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.service.alarmfront.application.port.out.NotificationRequestRepository;
 import org.service.alarmfront.domain.entity.NotificationRequest;
 import org.service.alarmfront.domain.value.Status;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +20,15 @@ public class NotificationRequestPersistenceAdapter implements NotificationReques
     private final JpaNotificationRequestRepository jpaNotificationRequestRepository;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public NotificationRequest save(NotificationRequest notificationRequest) {
         return jpaNotificationRequestRepository.save(notificationRequest);
+    }
+    
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public <S extends NotificationRequest> List<S> saveAll(Iterable<S> requests) {
+        return jpaNotificationRequestRepository.saveAll(requests);
     }
 
     @Override
@@ -29,4 +40,20 @@ public class NotificationRequestPersistenceAdapter implements NotificationReques
     public List<NotificationRequest> findByStatus(Status status) {
         return jpaNotificationRequestRepository.findByStatus(status);
     }
-} 
+    
+    @Override
+    public List<NotificationRequest> findScheduledNotifications(LocalDateTime beforeTime) {
+        return jpaNotificationRequestRepository.findByStatusAndScheduledTimeBefore(Status.SCHEDULED, beforeTime);
+    }
+    
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void updateStatus(Long id, Status status) {
+        jpaNotificationRequestRepository.updateStatus(id, status);
+    }
+    
+    @Override
+    public List<NotificationRequest> findRetryableNotifications(Status status, int maxRetryCount) {
+        return jpaNotificationRequestRepository.findRetryableNotifications(status, maxRetryCount);
+    }
+}

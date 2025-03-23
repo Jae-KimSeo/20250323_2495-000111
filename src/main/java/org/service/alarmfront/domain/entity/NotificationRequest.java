@@ -14,7 +14,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "notification_requests", indexes = {
-    @Index(name = "idx_notification_req_created", columnList = "created_at")
+    @Index(name = "idx_notification_req_created", columnList = "created_at"),
+    @Index(name = "idx_notification_req_status", columnList = "status")
 })
 @Getter
 @NoArgsConstructor
@@ -52,6 +53,9 @@ public class NotificationRequest {
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotificationHistory> histories = new ArrayList<>();
 
+    @Column(name = "attempt_count", nullable = false)
+    private int attemptCount = 0;
+
     public static NotificationRequest create(Channel channel, String contents, LocalDateTime scheduledTime) {
         NotificationRequest request = new NotificationRequest();
         request.targetId = "testTarget";
@@ -78,9 +82,6 @@ public class NotificationRequest {
 
     public void addHistory(NotificationHistory history) {
         this.histories.add(history);
-    }
-
-    public int getAttemptCount() {
-        return histories.size();
+        this.attemptCount = history.getAttemptCount();
     }
 }

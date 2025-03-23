@@ -10,6 +10,10 @@ import java.util.Optional;
 public interface NotificationRequestRepository {
 
     NotificationRequest save(NotificationRequest request);
+    <S extends NotificationRequest> List<S> saveAll(Iterable<S> requests);
     Optional<NotificationRequest> findById(Long id);
     List<NotificationRequest> findByStatus(Status status);
+    List<NotificationRequest> findScheduledNotifications(LocalDateTime beforeTime);
+    void updateStatus(Long id, Status status);
+    List<NotificationRequest> findRetryableNotifications(Status status, int maxRetryCount);
 }
