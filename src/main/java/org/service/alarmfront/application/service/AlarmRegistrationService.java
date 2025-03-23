@@ -12,6 +12,7 @@ import org.service.alarmfront.domain.exception.NotificationSendException;
 import org.service.alarmfront.domain.value.Channel;
 import org.service.alarmfront.domain.value.Status;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
 
@@ -28,7 +29,7 @@ public class AlarmRegistrationService implements RegisterAlarmUseCase {
     private final Map<Channel, NotificationSender> notificationSenders;
     
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Long registerAlarm(AlarmCommand command) {
         AlarmRegistrationStrategy strategy = strategyFactory.getStrategy(command.getClientType());
         strategy.validateRequest(command);

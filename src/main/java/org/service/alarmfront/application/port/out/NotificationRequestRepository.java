@@ -14,4 +14,6 @@ public interface NotificationRequestRepository {
     Optional<NotificationRequest> findById(Long id);
     List<NotificationRequest> findByStatus(Status status);
     List<NotificationRequest> findScheduledNotifications(LocalDateTime beforeTime);
+    void updateStatus(Long id, Status status);
+    List<NotificationRequest> findRetryableNotifications(Status status, int maxRetryCount);
 }

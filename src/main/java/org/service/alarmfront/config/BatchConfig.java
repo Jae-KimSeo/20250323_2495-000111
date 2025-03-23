@@ -25,7 +25,7 @@ public class BatchConfig {
         JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
         factory.setDataSource(dataSource);
         factory.setTransactionManager(transactionManager);
-        factory.setIsolationLevelForCreate("ISOLATION_SERIALIZABLE");
+        factory.setIsolationLevelForCreate("ISOLATION_READ_COMMITTED");
         factory.setTablePrefix("BATCH_");
         factory.setMaxVarCharLength(1000);
         return factory.getObject();

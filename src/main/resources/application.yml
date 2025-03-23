@@ -18,6 +18,10 @@ spring:
         jdbc:
             initialize-schema: always
         job:
-            enabled: false
+            enabled: false  # 서버 시작 시 모든 배치 자동 실행 방지
 server:
     port: 8080
+
+notification:
+    retry:
+        max-count: 3

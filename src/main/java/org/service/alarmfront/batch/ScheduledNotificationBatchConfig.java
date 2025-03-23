@@ -58,31 +58,17 @@ public class ScheduledNotificationBatchConfig {
 
     @Bean
     public ItemReader<NotificationRequest> scheduledNotificationReader() {
-        return new ItemReader<NotificationRequest>() {
+        return new ItemReader<>() {
             private List<NotificationRequest> scheduledNotifications;
             private int currentIndex = 0;
-            
+
             @Override
             public NotificationRequest read() {
                 if (scheduledNotifications == null) {
                     LocalDateTime now = LocalDateTime.now();
                     scheduledNotifications = notificationRequestRepository.findScheduledNotifications(now);
-                    log.info("예약된 알림 {} 건 조회됨 (현재 시간: {})", scheduledNotifications.size(), now);
-                    
-                    if (!scheduledNotifications.isEmpty()) {
-                        scheduledNotifications.forEach(notification -> {
-                            log.info("조회된 알림 - ID: {}, 상태: {}, 예약시간: {}, 대상: {}, 채널: {}",
-                                    notification.getId(),
-                                    notification.getStatus(),
-                                    notification.getScheduledTime(),
-                                    notification.getTargetId(),
-                                    notification.getChannel());
-                        });
-                    } else {
-                        log.info("조회된 예약 알림이 없습니다. (현재 시간: {})", now);
-                    }
                 }
-                
+
                 if (currentIndex < scheduledNotifications.size()) {
                     return scheduledNotifications.get(currentIndex++);
                 }
