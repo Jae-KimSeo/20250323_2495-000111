@@ -1,4 +1,6 @@
 spring:
+    main:
+        allow-bean-definition-overriding: true
     h2:
         console:
             enabled: true
@@ -13,6 +15,8 @@ spring:
             ddl-auto: update
         show-sql: true
     batch:
+        jdbc:
+            initialize-schema: always
         job:
             enabled: false
 server:

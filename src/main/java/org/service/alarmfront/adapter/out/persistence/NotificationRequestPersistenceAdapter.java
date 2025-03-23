@@ -6,6 +6,7 @@ import org.service.alarmfront.domain.entity.NotificationRequest;
 import org.service.alarmfront.domain.value.Status;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,11 @@ public class NotificationRequestPersistenceAdapter implements NotificationReques
     public NotificationRequest save(NotificationRequest notificationRequest) {
         return jpaNotificationRequestRepository.save(notificationRequest);
     }
+    
+    @Override
+    public <S extends NotificationRequest> List<S> saveAll(Iterable<S> requests) {
+        return jpaNotificationRequestRepository.saveAll(requests);
+    }
 
     @Override
     public Optional<NotificationRequest> findById(Long id) {
@@ -28,5 +34,10 @@ public class NotificationRequestPersistenceAdapter implements NotificationReques
     @Override
     public List<NotificationRequest> findByStatus(Status status) {
         return jpaNotificationRequestRepository.findByStatus(status);
+    }
+    
+    @Override
+    public List<NotificationRequest> findScheduledNotifications(LocalDateTime beforeTime) {
+        return jpaNotificationRequestRepository.findByStatusAndScheduledTimeBefore(Status.SCHEDULED, beforeTime);
     }
 } 
