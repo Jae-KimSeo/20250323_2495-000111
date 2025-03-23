@@ -2,6 +2,7 @@ package org.service.alarmfront.adapter.out.persistence;
 
 import org.service.alarmfront.domain.entity.NotificationRequest;
 import org.service.alarmfront.domain.value.Status;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -24,4 +25,11 @@ public interface JpaNotificationRequestRepository extends JpaRepository<Notifica
 
     @Query("SELECT r FROM NotificationRequest r WHERE r.status = :status AND r.attemptCount < :maxRetryCount")
     List<NotificationRequest> findRetryableNotifications(@Param("status") Status status, @Param("maxRetryCount") int maxRetryCount);
+    
+    Page<NotificationRequest> findByTargetIdAndCreatedAtGreaterThanEqualOrderByCreatedAtDesc(String targetId, LocalDateTime startDate, Pageable pageable);
+    
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM NotificationRequest r WHERE r.createdAt < :olderThan")
+    void deleteNotificationsOlderThan(@Param("olderThan") LocalDateTime olderThan);
 }

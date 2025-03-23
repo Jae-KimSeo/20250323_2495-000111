@@ -15,7 +15,8 @@ import java.util.List;
 @Entity
 @Table(name = "notification_requests", indexes = {
     @Index(name = "idx_notification_req_created", columnList = "created_at"),
-    @Index(name = "idx_notification_req_status", columnList = "status")
+    @Index(name = "idx_notification_req_status", columnList = "status"),
+    @Index(name = "idx_notification_req_target_created", columnList = "target_id, created_at")
 })
 @Getter
 @NoArgsConstructor
