@@ -171,7 +171,7 @@ src/main/java/org/service/alarmfront/
 
 ## 빌드 결과물 다운로드 링크
 
-[실행 가능한 JAR 다운로드](https://github.com/Jae-KimSeo/20250323_2495-000111/blob/feat/asynchoronous-process/AlarmFront-0.0.1-SNAPSHOT.jar)
+[실행 가능한 JAR 다운로드](https://github.com/Jae-KimSeo/20250323_2495-000111/raw/main/AlarmFront-0.0.1-SNAPSHOT.jar)
 
 ## 실행 방법
 
