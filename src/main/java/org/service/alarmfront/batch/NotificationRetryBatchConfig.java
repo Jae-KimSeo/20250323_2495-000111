@@ -19,11 +19,13 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 
 import java.util.List;
 import java.util.Map;
@@ -61,27 +63,13 @@ public class NotificationRetryBatchConfig {
     }
 
     @Bean
+    @StepScope
     public ItemReader<NotificationRequest> failedNotificationReader() {
-        return new ItemReader<>() {
-            private List<NotificationRequest> failedNotifications;
-            private int currentIndex = 0;
+        List<NotificationRequest> failedNotifications = notificationRequestRepository
+                .findRetryableNotifications(Status.FAILED, maxRetryCount);
 
-            @Override
-            public NotificationRequest read() {
-                if (failedNotifications == null) {
-                    failedNotifications = notificationRequestRepository.findRetryableNotifications(
-                            Status.FAILED, maxRetryCount);
-
-                    log.info("실패한 알림 {} 건 재시도 준비", failedNotifications.size());
-                }
-
-                if (currentIndex < failedNotifications.size()) {
-                    return failedNotifications.get(currentIndex++);
-                }
-
-                return null;
-            }
-        };
+        log.info("실패한 알림 {} 건 재시도 준비", failedNotifications.size());
+        return new ListItemReader<>(failedNotifications);
     }
 
     @Bean
@@ -101,19 +89,19 @@ public class NotificationRetryBatchConfig {
             }
             
             try {
-                    log.info("알림 재시도 발송: ID={}, 채널={}, 대상={}, 시도 횟수={}/{}", 
+                log.info("알림 재시도 발송: ID={}, 채널={}, 대상={}, 시도 횟수={}/{}",
                         request.getId(), channel, request.getTargetId(), attemptCount + 1, maxRetryCount);
-                    
-                    boolean success = sender.send(request);
-                    
-                    if (success) {
-                        handleSuccess(request, attemptCount);
-                    } else {
-                        handleFailure(request, "알림 재시도 실패: 결과 코드 FAIL");
-                    }
-                } catch (Exception e) {
-                    handleException(request, e);
+                
+                boolean success = sender.send(request);
+                
+                if (success) {
+                    handleSuccess(request, attemptCount);
+                } else {
+                    handleFailure(request, "알림 재시도 실패: 결과 코드 FAIL");
                 }
+            } catch (Exception e) {
+                handleException(request, e);
+            }
             
             return request;
         };

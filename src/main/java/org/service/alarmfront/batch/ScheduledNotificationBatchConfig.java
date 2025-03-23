@@ -7,6 +7,7 @@ import org.service.alarmfront.application.port.out.NotificationSender;
 import org.service.alarmfront.domain.entity.NotificationHistory;
 import org.service.alarmfront.domain.entity.NotificationRequest;
 import org.service.alarmfront.domain.exception.NotificationSendException;
+import org.service.alarmfront.domain.value.Channel;
 import org.service.alarmfront.domain.value.Status;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -14,14 +15,13 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.*;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,7 +35,7 @@ public class ScheduledNotificationBatchConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final NotificationRequestRepository notificationRequestRepository;
-    private final Map<org.service.alarmfront.domain.value.Channel, NotificationSender> notificationSenders;
+    private final Map<Channel, NotificationSender> notificationSenders;
     
     @Bean
     public Job processScheduledNotificationsJob() {
@@ -57,31 +57,19 @@ public class ScheduledNotificationBatchConfig {
     }
 
     @Bean
+    @StepScope
     public ItemReader<NotificationRequest> scheduledNotificationReader() {
-        return new ItemReader<>() {
-            private List<NotificationRequest> scheduledNotifications;
-            private int currentIndex = 0;
-
-            @Override
-            public NotificationRequest read() {
-                if (scheduledNotifications == null) {
-                    LocalDateTime now = LocalDateTime.now();
-                    scheduledNotifications = notificationRequestRepository.findScheduledNotifications(now);
-                }
-
-                if (currentIndex < scheduledNotifications.size()) {
-                    return scheduledNotifications.get(currentIndex++);
-                }
-
-                return null;
-            }
-        };
+        LocalDateTime now = LocalDateTime.now();
+        List<NotificationRequest> scheduledNotifications =
+                notificationRequestRepository.findScheduledNotifications(now);
+        log.info("예약된 알림 {} 건 조회", scheduledNotifications.size());
+        return new ListItemReader<>(scheduledNotifications);
     }
 
     @Bean
     public ItemProcessor<NotificationRequest, NotificationRequest> notificationProcessor() {
         return request -> {
-            org.service.alarmfront.domain.value.Channel channel = request.getChannel();
+            Channel channel = request.getChannel();
             NotificationSender sender = notificationSenders.get(channel);
             
             if (sender == null) {
