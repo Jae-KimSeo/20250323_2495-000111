@@ -6,7 +6,6 @@ import org.service.alarmfront.adapter.out.api.dto.SendResponse;
 import org.service.alarmfront.adapter.out.api.dto.SmsSendRequest;
 import org.service.alarmfront.application.port.out.NotificationSender;
 import org.service.alarmfront.domain.entity.NotificationRequest;
-import org.service.alarmfront.domain.exception.NotificationSendException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
