@@ -13,6 +13,7 @@ import org.service.alarmfront.domain.value.Channel;
 import org.service.alarmfront.domain.value.Status;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
 
@@ -29,28 +30,44 @@ public class AlarmRegistrationService implements RegisterAlarmUseCase {
     private final Map<Channel, NotificationSender> notificationSenders;
     
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Long registerAlarm(AlarmCommand command) {
+        return createAlarmRecord(command);
+    }
+    
+    public Long createAlarmRecord(AlarmCommand command) {
         AlarmRegistrationStrategy strategy = strategyFactory.getStrategy(command.getClientType());
         strategy.validateRequest(command);
         Channel channel = strategy.determineChannel(command);
 
         NotificationRequest request = createNotificationRequest(command, channel);
-
-        if (command.getScheduledTime() == null || command.getScheduledTime().isBefore(LocalDateTime.now())) {
-            request.updateStatus(Status.PROCESSING);
-            NotificationRequest savedRequest = notificationRequestRepository.save(request);
-            sendAlarmImmediately(savedRequest, channel);
-        } else {
-            request.updateStatus(Status.SCHEDULED);
-            notificationRequestRepository.save(request);
-            log.info("알림 예약 발송 등록: ID={}, 시각={}, 채널={}", 
-                    request.getId(), command.getScheduledTime(), channel);
-        }
+        request.updateStatus(Status.INIT);
+        NotificationRequest savedRequest = notificationRequestRepository.save(request);
 
         strategy.processClientSpecificLogic(command);
-        
-        return request.getId();
+
+        return savedRequest.getId();
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
+    public void processAlarmRecord(Long alarmId) {
+        NotificationRequest request = notificationRequestRepository.findById(alarmId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 알림 ID 입니다: " + alarmId));
+
+        if (request.getStatus() != Status.INIT && request.getStatus() != Status.PROCESSING) {
+            log.info("알림 ID={} 은 이미 처리중이거나 처리완료 상태입니다: {}", alarmId, request.getStatus());
+            return;
+        }
+        request.updateStatus(Status.PROCESSING);
+        NotificationRequest saved = notificationRequestRepository.save(request);
+
+        if (saved.getScheduledTime() == null || saved.getScheduledTime().isBefore(LocalDateTime.now())) {
+            sendAlarmImmediately(saved, saved.getChannel());
+        } else {
+            saved.updateStatus(Status.SCHEDULED);
+            notificationRequestRepository.save(saved);
+            log.info("알림 예약 발송 등록: ID={}, 시각={}, 채널={}", 
+                    saved.getId(), saved.getScheduledTime(), saved.getChannel());
+        }
     }
     
     private NotificationRequest createNotificationRequest(AlarmCommand command, Channel channel) {

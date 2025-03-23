@@ -12,3 +12,8 @@ spring:
   h2:
     console:
       enabled: true
+  batch:
+    jdbc:
+      initialize-schema: embedded
+    job:
+      enabled: false

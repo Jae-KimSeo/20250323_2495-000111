@@ -3,7 +3,7 @@ package org.service.alarmfront.adapter.in.web;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.service.alarmfront.application.port.in.InquireNotificationHistoryUseCase;
-import org.service.alarmfront.application.port.in.RegisterAlarmUseCase;
+import org.service.alarmfront.application.service.AsyncAlarmQueueService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AlarmRegistrationController {
 
-    private final RegisterAlarmUseCase registerAlarmUseCase;
     private final InquireNotificationHistoryUseCase inquireNotificationHistoryUseCase;
+    private final AsyncAlarmQueueService asyncAlarmQueueService;
     
     @PostMapping
     public ResponseEntity<AlarmRegistrationResponse> registerAlarm(@RequestBody AlarmRegistrationRequest request) {
         try {
-            Long alarmId = registerAlarmUseCase.registerAlarm(request.toCommand());
+            Long alarmId = asyncAlarmQueueService.createAlarmRecord(request.toCommand());
             return ResponseEntity.ok(AlarmRegistrationResponse.success(alarmId));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(AlarmRegistrationResponse.error(e.getMessage()));
